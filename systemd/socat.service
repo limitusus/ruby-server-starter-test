@@ -1,0 +1,14 @@
+[Unit]
+Description = Socat (%i)
+After = network.target app.service
+
+[Service]
+Type = simple
+WorkingDirectory = /usr/local/app-%i
+ExecStart = /usr/bin/socat -d -d TCP-LISTEN:PORT,fork UNIX:/usr/local/app-%i/log/puma.sock
+
+RestartSec = 1
+Restart = always
+
+[Install]
+WantedBy = multi-user.target

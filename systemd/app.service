@@ -1,0 +1,25 @@
+[Unit]
+Description = Puma app (%i)
+After = network.target
+
+[Service]
+Type = simple
+Umask = 0002
+WorkingDirectory = /usr/local/app-%i
+ExecStart = /start_server \
+  --dir=/usr/local/app-%i \
+  --path=/usr/local/app-%i/log/puma.sock \
+  --signal-on-hup=TERM --signal-on-term=TERM \
+  --status-file=/usr/local/app-%i/log/puma.status \
+  --pid-file=/usr/local/app-%i/log/puma.pid \
+  --interval=5 \
+  -- \
+  bash -c '/usr/local/rvm/bin/rvm all do bundle exec --keep-file-descriptors start_puma.rb puma -C config/puma.rb -e none config.ru'
+
+ExecReload = /usr/bin/kill -s HUP $MAINPID
+RestartSec = 1
+Restart = always
+Environment='HOME=/root'
+
+[Install]
+WantedBy = multi-user.target
