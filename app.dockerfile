@@ -9,6 +9,9 @@ COPY app/ /usr/local/app-puma5-fix/
 RUN curl -L https://github.com/lestrrat-go/server-starter/releases/download/0.0.2/start_server_linux_amd64.tar.gz -o /start_server_linux_amd64.tar.gz
 RUN tar xf /start_server_linux_amd64.tar.gz && mv /start_server_linux_amd64/start_server /start_server
 
+# Patch
+COPY puma_listener.rb.patch /puma_listener.rb.patch
+
 # Puma4
 WORKDIR /usr/local/app-puma4
 RUN bundle config set path ./vendor/bundle
@@ -36,7 +39,7 @@ RUN bundle config set path ./vendor/bundle
 RUN bundle install
 COPY systemd/app.service /etc/systemd/system/app@puma4-fix.service
 COPY systemd/socat.service /etc/systemd/system/socat@puma4-fix.service
-COPY puma_listener_fix.rb vendor/bundle/ruby/3.0.0/gems/server-starter-0.3.1/lib/server/starter/puma_listener.rb
+RUN patch vendor/bundle/ruby/3.0.0/gems/server-starter-0.3.1/lib/server/starter/puma_listener.rb /puma_listener.rb.patch
 RUN sed -i -e 's/PORT/10082/' /etc/systemd/system/socat@puma4-fix.service
 RUN systemctl enable app@puma4-fix.service
 RUN systemctl enable socat@puma4-fix.service
@@ -49,7 +52,7 @@ RUN bundle install
 COPY systemd/app.service /etc/systemd/system/app@puma5-fix.service
 COPY systemd/socat.service /etc/systemd/system/socat@puma5-fix.service
 RUN sed -i -e 's/PORT/10083/' /etc/systemd/system/socat@puma5-fix.service
-COPY puma_listener_fix.rb vendor/bundle/ruby/3.0.0/gems/server-starter-0.3.1/lib/server/starter/puma_listener.rb
+RUN patch vendor/bundle/ruby/3.0.0/gems/server-starter-0.3.1/lib/server/starter/puma_listener.rb /puma_listener.rb.patch
 RUN systemctl enable app@puma5-fix.service
 RUN systemctl enable socat@puma5-fix.service
 
